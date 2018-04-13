@@ -15,6 +15,7 @@ from PIL import Image
 
 import tensorflow as tf
 import numpy as np
+import scipy.io
 
 from deeplab_resnet import DeepLabResNetModel, ImageReader, decode_labels, prepare_label
 
@@ -23,10 +24,23 @@ IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 NUM_CLASSES = 21
 
 IMAGE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/images/'
-SAVE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/output/'
+COLOR_MASK_SAVE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/color_mask_output/'
+MATLAB_SAVE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/matlab_files/'
 FILELIST = '/media/data/bruppik/deeplab_resnet_test_dataset/filelist.txt'
 MODEL_WEIGHTS = '/media/data/bruppik/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
 
+def get_arguments():
+    """Parse all the arguments provided from the CLI.
+    
+    Returns:
+      A list of parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="DeepLabLFOV Network Inference.")
+    parser.add_argument("img_path", type=str,
+                        help="Path to the RGB image file.")
+    parser.add_argument("save_path", type=str,
+                        help="Where to save predicted mask.")
+    return parser.parse_args()
 
 def load(saver, sess, ckpt_path):
     '''Load trained weights.
@@ -83,19 +97,19 @@ def infer_and_save_color_map(img_name):
 
     # Save the image
     filename, file_extension = os.path.splitext(img_name)
-    save_path = SAVE_DIR + filename + '_mask.png'
-    if not os.path.exists(SAVE_DIR):
-        os.makedirs(SAVE_DIR)
+    save_path = COLOR_MASK_SAVE_DIR + filename + '_mask.png'
+    if not os.path.exists(COLOR_MASK_SAVE_DIR):
+        os.makedirs(COLOR_MASK_SAVE_DIR)
     im.save(save_path)
     
     print('The output file has been saved to {}'.format(save_path))
 
-def infer(img_name):
+def infer_absolute_path(img_path):
     """Create the model and start the evaluation process."""
     tf.reset_default_graph()
     
     # Prepare image.
-    img = tf.image.decode_png(tf.read_file(IMAGE_DIR + img_name), channels=3)
+    img = tf.image.decode_png(tf.read_file(img_path), channels=3)
     # Convert RGB to BGR.
     img_r, img_g, img_b = tf.split(axis=2, num_or_size_splits=3, value=img)
     img = tf.cast(tf.concat(axis=2, values=[img_b, img_g, img_r]), dtype=tf.float32)
@@ -129,9 +143,38 @@ def infer(img_name):
     
     # Perform inference.
     # preds is in our test case an object of type numpy.ndarray
-    # with preds.shape = (1, 960, 1280, 1)
-    preds = sess.run(pred) 
+    # with preds.shape = (1, image_height, image_width, 1)
+    # (in our case this was (1, 960, 1280, 1)) 
+    preds = sess.run(pred)
+    
+    # Unpack the first dimension    
+    preds = preds[0]
+    
     return preds
+
+def infer(img_name):
+    return infer_absolute_path(IMAGE_DIR + img_name)
+
+def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_path):
+    # Predict the labels    
+    preds = infer_absolute_path(img_absolute_path)
+    scipy.io.savemat(labels_absolute_path, mdict={'labels': preds})
+    print('The output file has been saved to {}'.format(labels_absolute_path))
+
+    return
+
+def infer_and_save_to_matlab(img_name, labels_name = 'labels.mat'):
+    # Predict the labels    
+    preds = infer(img_name)
+
+    if not os.path.exists(MATLAB_SAVE_DIR):
+        os.makedirs(MATLAB_SAVE_DIR)
+    
+    path = MATLAB_SAVE_DIR + labels_name
+    scipy.io.savemat(path, mdict={'labels': preds})
+    print('The output file has been saved to {}'.format(path))
+
+    return
 
 def infer_and_save_color_map_for_list():
     text_file = open(FILELIST, "r")
@@ -143,3 +186,15 @@ def infer_and_save_color_map_for_list():
 
     return
 
+def main():
+    """Create the model and start the evaluation process."""
+    args = get_arguments()
+    # Now have
+    # args.img_path and args.save_path
+    
+    infer_and_save_to_matlab_absolute_path(args.img_path, args.save_path)
+
+    return
+    
+if __name__ == '__main__':
+    main()
