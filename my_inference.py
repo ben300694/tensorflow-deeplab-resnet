@@ -160,7 +160,7 @@ def infer(img_name, model_weights):
 def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_path, model_weights):
     # Predict the labels    
     preds = infer_absolute_path(img_absolute_path, model_weights)
-    scipy.io.savemat(labels_absolute_path, mdict={'labels': preds})
+    scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16)})
     print('The output file has been saved to {}'.format(labels_absolute_path))
 
     return
