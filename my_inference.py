@@ -40,6 +40,8 @@ def get_arguments():
                         help="Path to the RGB image file.")
     parser.add_argument("save_path", type=str,
                         help="Where to save predicted mask.")
+    parser.add_argument("--model_weights", type=str, default=MODEL_WEIGHTS,
+                        help="Path to the file with model weights.")
     return parser.parse_args()
 
 def load(saver, sess, ckpt_path):
@@ -104,7 +106,7 @@ def infer_and_save_color_map(img_name):
     
     print('The output file has been saved to {}'.format(save_path))
 
-def infer_absolute_path(img_path):
+def infer_absolute_path(img_path, model_weights):
     """Create the model and start the evaluation process."""
     tf.reset_default_graph()
     
@@ -139,7 +141,7 @@ def infer_absolute_path(img_path):
     
     # Load weights.
     loader = tf.train.Saver(var_list=restore_var)
-    load(loader, sess, MODEL_WEIGHTS)
+    load(loader, sess, model_weights)
     
     # Perform inference.
     # preds is in our test case an object of type numpy.ndarray
@@ -152,12 +154,12 @@ def infer_absolute_path(img_path):
     
     return preds
 
-def infer(img_name):
-    return infer_absolute_path(IMAGE_DIR + img_name)
+def infer(img_name, model_weights):
+    return infer_absolute_path(IMAGE_DIR + img_name, model_weights)
 
-def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_path):
+def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_path, model_weights):
     # Predict the labels    
-    preds = infer_absolute_path(img_absolute_path)
+    preds = infer_absolute_path(img_absolute_path, model_weights)
     scipy.io.savemat(labels_absolute_path, mdict={'labels': preds})
     print('The output file has been saved to {}'.format(labels_absolute_path))
 
@@ -191,8 +193,11 @@ def main():
     args = get_arguments()
     # Now have
     # args.img_path and args.save_path
+    # Optionally have
+    # args.model_weights
     
-    infer_and_save_to_matlab_absolute_path(args.img_path, args.save_path)
+    
+    infer_and_save_to_matlab_absolute_path(args.img_path, args.save_path, args.model_weights)
 
     return
     
