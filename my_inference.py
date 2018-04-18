@@ -17,7 +17,7 @@ import tensorflow as tf
 import numpy as np
 import scipy.io
 
-from deeplab_resnet import DeepLabResNetModel, ImageReader, decode_labels, prepare_label
+from deeplab_resnet import DeepLabResNetModel, ImageReader, decode_labels, dense_crf, prepare_label
 
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
     
@@ -42,6 +42,8 @@ def get_arguments():
                         help="Where to save predicted mask.")
     parser.add_argument("--model_weights", type=str, default=MODEL_WEIGHTS,
                         help="Path to the file with model weights.")
+    parser.add_argument("--use_crf", action="store_true",
+                        help="Whether to apply a CRF after inference")
     return parser.parse_args()
 
 def load(saver, sess, ckpt_path):
@@ -106,14 +108,14 @@ def infer_and_save_color_map(img_name):
     
     print('The output file has been saved to {}'.format(save_path))
 
-def infer_absolute_path(img_path, model_weights):
+def infer_absolute_path(img_path, model_weights, use_crf):
     """Create the model and start the evaluation process."""
     tf.reset_default_graph()
     
     # Prepare image.
-    img = tf.image.decode_png(tf.read_file(img_path), channels=3)
+    img_orig = tf.image.decode_png(tf.read_file(img_path), channels=3)
     # Convert RGB to BGR.
-    img_r, img_g, img_b = tf.split(axis=2, num_or_size_splits=3, value=img)
+    img_r, img_g, img_b = tf.split(axis=2, num_or_size_splits=3, value=img_orig)
     img = tf.cast(tf.concat(axis=2, values=[img_b, img_g, img_r]), dtype=tf.float32)
     # Extract mean.
     img -= IMG_MEAN 
@@ -127,10 +129,16 @@ def infer_absolute_path(img_path, model_weights):
     # Predictions.
     raw_output = net.layers['fc1_voc12']
     raw_output_up = tf.image.resize_bilinear(raw_output, tf.shape(img)[0:2,])
+
+    # CRF.
+    if use_crf:
+        raw_output_up = tf.nn.softmax(raw_output_up)
+        raw_output_up = tf.py_func(dense_crf, [raw_output_up, tf.expand_dims(img_orig, dim=0)], tf.float32)
+    
+    # Get maximum score    
     raw_output_up = tf.argmax(raw_output_up, dimension=3)
     pred = tf.expand_dims(raw_output_up, dim=3)
 
-    
     # Set up TF session and initialize variables. 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -157,12 +165,18 @@ def infer_absolute_path(img_path, model_weights):
 def infer(img_name, model_weights):
     return infer_absolute_path(IMAGE_DIR + img_name, model_weights)
 
-def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_path, model_weights):
-    # Predict the labels    
-    preds = infer_absolute_path(img_absolute_path, model_weights)
-    scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16)})
-    print('The output file has been saved to {}'.format(labels_absolute_path))
-
+def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_path, model_weights, use_crf):
+    # Predict the labels
+    preds = infer_absolute_path(img_absolute_path, model_weights, use_crf=False)
+    
+    if use_crf == False:    
+        scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16)})
+        print('The output file has been saved to {}'.format(labels_absolute_path))
+        return
+    
+    preds_crf = infer_absolute_path(img_absolute_path, model_weights, use_crf=True)
+    scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16), 'labels_crf': preds_crf.astype(np.uint16)})
+    
     return
 
 def infer_and_save_to_matlab(img_name, labels_name = 'labels.mat'):
@@ -197,7 +211,7 @@ def main():
     # args.model_weights
     
     
-    infer_and_save_to_matlab_absolute_path(args.img_path, args.save_path, args.model_weights)
+    infer_and_save_to_matlab_absolute_path(args.img_path, args.save_path, args.model_weights, args.use_crf)
 
     return
     
