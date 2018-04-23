@@ -4,7 +4,7 @@ import tensorflow as tf
 
 import pydensecrf.densecrf as dcrf
 
-n_classes = 21
+n_classes = 27
 # colour map
 label_colours = [(0,0,0)
                 # 0=background
@@ -14,8 +14,11 @@ label_colours = [(0,0,0)
                 # 6=bus, 7=car, 8=cat, 9=chair, 10=cow
                 ,(192,128,0),(64,0,128),(192,0,128),(64,128,128),(192,128,128)
                 # 11=diningtable, 12=dog, 13=horse, 14=motorbike, 15=person
-                ,(0,64,0),(128,64,0),(0,192,0),(128,192,0),(0,64,128)]
+                ,(0,64,0),(128,64,0),(0,192,0),(128,192,0),(0,64,128)
                 # 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor
+                ,(0,0,0),(0,0,0),(0,0,0),(0,0,0),(0,0,0),(0,0,0)]
+# TODO Implement a way to add new classes
+# TODO Think of a good color scheme
 
 def decode_labels(mask, num_images=1, num_classes=21):
     """Decode batch of segmentation masks.

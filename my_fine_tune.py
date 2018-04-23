@@ -103,6 +103,7 @@ def load(saver, sess, ckpt_path):
 def fine_tune():
     """Create the model and start the training."""
     args = get_arguments()
+    print(args)
     
     h, w = map(int, args.input_size.split(','))
     input_size = (h, w)

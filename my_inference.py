@@ -21,7 +21,7 @@ from deeplab_resnet import DeepLabResNetModel, ImageReader, decode_labels, dense
 
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
     
-NUM_CLASSES = 21
+NUM_CLASSES = 27
 
 IMAGE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/images/'
 COLOR_MASK_SAVE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/color_mask_output/'
@@ -176,6 +176,7 @@ def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_pa
     
     preds_crf = infer_absolute_path(img_absolute_path, model_weights, use_crf=True)
     scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16), 'labels_crf': preds_crf.astype(np.uint16)})
+    print('The output file has been saved to {}'.format(labels_absolute_path))
     
     return
 
