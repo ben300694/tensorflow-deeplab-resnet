@@ -29,11 +29,11 @@ IGNORE_LABEL = 255
 INPUT_SIZE = '960,1280'
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 27
-NUM_STEPS = 20000
+NUM_STEPS = 2000
 RANDOM_SEED = 1234
 RESTORE_FROM = '/media/data/bruppik/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
-SAVE_NUM_IMAGES = 2
-SAVE_PRED_EVERY = 100
+SAVE_NUM_IMAGES = 4
+SAVE_PRED_EVERY = 20
 SNAPSHOT_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune/'
 
 def get_arguments():

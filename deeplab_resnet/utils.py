@@ -16,7 +16,19 @@ label_colours = [(0,0,0)
                 # 11=diningtable, 12=dog, 13=horse, 14=motorbike, 15=person
                 ,(0,64,0),(128,64,0),(0,192,0),(128,192,0),(0,64,128)
                 # 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor
-                ,(0,0,0),(0,0,0),(0,0,0),(0,0,0),(0,0,0),(0,0,0)]
+                ,(0,0,192)
+                # 21
+                ,(0,192,0)
+                # 22
+                ,(0,0,0)
+                # 23
+                ,(0,0,0)
+                # 24
+                ,(0,0,0)
+                # 25
+                ,(0,0,0)
+                # 26
+                ]
 # TODO Implement a way to add new classes
 # TODO Think of a good color scheme
 
