@@ -14,28 +14,32 @@ from datetime import datetime
 import os
 import sys
 import time
+import yaml
 
 import tensorflow as tf
 import numpy as np
 
 from deeplab_resnet import DeepLabResNetModel, ImageReader, decode_labels, inv_preprocess, prepare_label
 
+# Load the configuration file
+config = yaml.safe_load(open('config.yml'))
+
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 
 BATCH_SIZE = 4
-DATA_DIRECTORY = '/media/data/bruppik/deeplab_resnet_test_dataset'
-DATA_LIST_PATH = '/media/data/bruppik/deeplab_resnet_test_dataset/train.txt'
-IGNORE_LABEL = 255
+DATA_DIRECTORY = config['directories']['DATA_DIRECTORY']
+DATA_TRAIN_LIST_PATH = config['directories']['DATA_TRAIN_LIST_PATH']
+IGNORE_LABEL = config['IGNORE_LABEL']
 INPUT_SIZE = '960,1280'
 LEARNING_RATE = 1e-4
-NUM_CLASSES = 27
-NUM_STEPS = 2000
+NUM_CLASSES = config['NUM_CLASSES']
+NUM_STEPS = 600
 RANDOM_SEED = 1234
 RESTORE_FROM = '/media/data/bruppik/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
-SAVE_NUM_IMAGES = 4
-SAVE_PRED_EVERY = 40
-SAVE_SUMMARY_EVERY = 10
-SNAPSHOT_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune/'
+SAVE_NUM_IMAGES = 3
+SAVE_PRED_EVERY = 50
+SAVE_SUMMARY_EVERY = 25
+SNAPSHOT_DIRECTORY = config['directories']['SNAPSHOT_DIRECTORY']
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -48,7 +52,7 @@ def get_arguments():
                         help="Number of images sent to the network in one step.")
     parser.add_argument("--data-dir", type=str, default=DATA_DIRECTORY,
                         help="Path to the directory containing the PASCAL VOC dataset.")
-    parser.add_argument("--data-list", type=str, default=DATA_LIST_PATH,
+    parser.add_argument("--data-list", type=str, default=DATA_TRAIN_LIST_PATH,
                         help="Path to the file listing the images in the dataset.")
     parser.add_argument("--ignore-label", type=int, default=IGNORE_LABEL,
                         help="The index of the label to ignore during the training.")
@@ -78,7 +82,7 @@ def get_arguments():
                         help="Save summaries and checkpoint every often.")
     parser.add_argument("--save-summary-every", type=int, default=SAVE_SUMMARY_EVERY,
                         help="Save summaries every often.")
-    parser.add_argument("--snapshot-dir", type=str, default=SNAPSHOT_DIR,
+    parser.add_argument("--snapshot-dir", type=str, default=SNAPSHOT_DIRECTORY,
                         help="Where to save snapshots of the model.")
     return parser.parse_args()
 

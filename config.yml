@@ -1,0 +1,8 @@
+directories:
+  DATA_DIRECTORY: '/media/data/bruppik/deeplab_resnet_test_dataset'
+  DATA_VAL_LIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/val.txt'
+  DATA_TRAIN_LIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/train.txt'
+  SNAPSHOT_DIRECTORY: '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune/'
+IGNORE_LABEL: 255
+NUM_CLASSES: 27
+NUM_VALIDATION_IMAGES: 3
