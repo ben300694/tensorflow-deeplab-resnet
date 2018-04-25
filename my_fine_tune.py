@@ -33,7 +33,8 @@ NUM_STEPS = 2000
 RANDOM_SEED = 1234
 RESTORE_FROM = '/media/data/bruppik/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
 SAVE_NUM_IMAGES = 4
-SAVE_PRED_EVERY = 20
+SAVE_PRED_EVERY = 40
+SAVE_SUMMARY_EVERY = 10
 SNAPSHOT_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune/'
 
 def get_arguments():
@@ -75,6 +76,8 @@ def get_arguments():
                         help="How many images to save.")
     parser.add_argument("--save-pred-every", type=int, default=SAVE_PRED_EVERY,
                         help="Save summaries and checkpoint every often.")
+    parser.add_argument("--save-summary-every", type=int, default=SAVE_SUMMARY_EVERY,
+                        help="Save summaries every often.")
     parser.add_argument("--snapshot-dir", type=str, default=SNAPSHOT_DIR,
                         help="Where to save snapshots of the model.")
     return parser.parse_args()
@@ -103,6 +106,7 @@ def load(saver, sess, ckpt_path):
 def fine_tune():
     """Create the model and start the training."""
     args = get_arguments()
+    print("Program arguments: ")
     print(args)
     
     h, w = map(int, args.input_size.split(','))
@@ -161,16 +165,24 @@ def fine_tune():
     labels_summary = tf.py_func(decode_labels, [label_batch, args.save_num_images, args.num_classes], tf.uint8)
     preds_summary = tf.py_func(decode_labels, [pred, args.save_num_images, args.num_classes], tf.uint8)
     
-    total_summary = tf.summary.image('images', 
-                                     tf.concat(axis=2, values=[images_summary, labels_summary, preds_summary]), 
-                                     max_outputs=args.save_num_images) # Concatenate row-wise.
-    summary_writer = tf.summary.FileWriter(args.snapshot_dir,
-                                           graph=tf.get_default_graph())
+    tf.summary.image('images',
+                     tf.concat(axis=2, values=[images_summary, labels_summary, preds_summary]),
+                     max_outputs=args.save_num_images) # Concatenate row-wise.
+    tf.summary.scalar('loss', reduced_loss)
    
     # Define loss and optimisation parameters.
-    optimiser = tf.train.AdamOptimizer(learning_rate=args.learning_rate)
-    optim = optimiser.minimize(reduced_loss, var_list=trainable)
-    
+    with tf.name_scope('train'):
+        optimiser = tf.train.AdamOptimizer(learning_rate=args.learning_rate)
+        optim = optimiser.minimize(reduced_loss, var_list=trainable)
+
+    tf.summary.scalar('learning rate', optimiser._lr)
+
+    # Merge all the summaries and write them out
+    total_summary = tf.summary.merge_all()
+    train_summary_writer = tf.summary.FileWriter(args.snapshot_dir + '/train',
+                                           graph=tf.get_default_graph())
+
+
     # Set up tf session and initialize variables. 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -196,8 +208,11 @@ def fine_tune():
         
         if step % args.save_pred_every == 0:
             loss_value, images, labels, preds, summary, _ = sess.run([reduced_loss, image_batch, label_batch, pred, total_summary, optim])
-            summary_writer.add_summary(summary, step)
+            train_summary_writer.add_summary(summary, step)
             save(saver, sess, args.snapshot_dir, step)
+        elif step % args.save_summary_every == 0:
+            loss_value, summary, _ = sess.run([reduced_loss, total_summary, optim])
+            train_summary_writer.add_summary(summary, step)
         else:
             loss_value, _ = sess.run([reduced_loss, optim])
         duration = time.time() - start_time
