@@ -28,7 +28,7 @@ DATA_VAL_LIST_PATH = config['directories']['DATA_VAL_LIST_PATH']
 IGNORE_LABEL = config['IGNORE_LABEL']
 NUM_CLASSES = config['NUM_CLASSES']
 NUM_STEPS = config['NUM_VALIDATION_IMAGES'] # Number of images in the validation set.
-RESTORE_FROM = '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune_second_try/model_finetuned.ckpt-160'
+RESTORE_FROM = '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune/model_finetuned.ckpt-100'
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.

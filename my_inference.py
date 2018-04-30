@@ -10,6 +10,7 @@ from datetime import datetime
 import os
 import sys
 import time
+import yaml
 
 from PIL import Image
 
@@ -19,13 +20,17 @@ import scipy.io
 
 from deeplab_resnet import DeepLabResNetModel, ImageReader, decode_labels, dense_crf, prepare_label
 
+# Load the configuration file
+full_path = os.path.realpath(__file__)
+config = yaml.safe_load(open(os.path.dirname(full_path) + '/config.yml'))
+
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
     
-NUM_CLASSES = 27
+NUM_CLASSES = config['NUM_CLASSES']
 
-IMAGE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/images/'
-COLOR_MASK_SAVE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/color_mask_output/'
-MATLAB_SAVE_DIR = '/media/data/bruppik/deeplab_resnet_test_dataset/matlab_files/'
+IMAGE_DIR = config['directories']['IMAGE_DIR']
+COLOR_MASK_SAVE_DIR = config['directories']['COLOR_MASK_SAVE_DIR']
+MATLAB_SAVE_DIR = config['directories']['MATLAB_SAVE_DIR']
 FILELIST = '/media/data/bruppik/deeplab_resnet_test_dataset/filelist.txt'
 MODEL_WEIGHTS = '/media/data/bruppik/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
 
