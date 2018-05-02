@@ -31,8 +31,9 @@ NUM_CLASSES = config['NUM_CLASSES']
 IMAGE_DIR = config['directories']['IMAGE_DIR']
 COLOR_MASK_SAVE_DIR = config['directories']['COLOR_MASK_SAVE_DIR']
 MATLAB_SAVE_DIR = config['directories']['MATLAB_SAVE_DIR']
-FILELIST = '/media/data/bruppik/deeplab_resnet_test_dataset/filelist.txt'
-MODEL_WEIGHTS = '/media/data/bruppik/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
+MODEL_WEIGHTS = config['RESTORE_FROM']
+
+FILELIST = config['directories']['DATA_FILELIST_PATH']
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -62,56 +63,36 @@ def load(saver, sess, ckpt_path):
     saver.restore(sess, ckpt_path)
     print("Restored model parameters from {}".format(ckpt_path))
 
-def infer_and_save_color_map(img_name):
-    """Create the model and start the evaluation process."""
-    tf.reset_default_graph()
-    
-    # Prepare image.
-    img = tf.image.decode_png(tf.read_file(IMAGE_DIR + img_name), channels=3)
-    # Convert RGB to BGR.
-    img_r, img_g, img_b = tf.split(axis=2, num_or_size_splits=3, value=img)
-    img = tf.cast(tf.concat(axis=2, values=[img_b, img_g, img_r]), dtype=tf.float32)
-    # Extract mean.
-    img -= IMG_MEAN 
-    
-    # Create network.
-    net = DeepLabResNetModel({'data': tf.expand_dims(img, dim=0)}, is_training=False, num_classes=NUM_CLASSES)
 
-    # Which variables to load.
-    restore_var = tf.global_variables()
+def infer_and_save_color_map(img_path, model_weights, use_crf):
 
-    # Predictions.
-    raw_output = net.layers['fc1_voc12']
-    raw_output_up = tf.image.resize_bilinear(raw_output, tf.shape(img)[0:2,])
-    raw_output_up = tf.argmax(raw_output_up, dimension=3)
-    pred = tf.expand_dims(raw_output_up, dim=3)
-
-    
-    # Set up TF session and initialize variables. 
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    sess = tf.Session(config=config)
-    init = tf.global_variables_initializer()
-    
-    sess.run(init)
-    
-    # Load weights.
-    loader = tf.train.Saver(var_list=restore_var)
-    load(loader, sess, MODEL_WEIGHTS)
-    
     # Perform inference.
-    preds = sess.run(pred)    
+    preds = infer_absolute_path(img_path, model_weights, use_crf)
+    # Have to add an extra dimension in the front because `infer_absolute_path` removed the batch dimension
+    preds = np.expand_dims(preds, axis=0)
+
     msk = decode_labels(preds, num_classes=NUM_CLASSES)
     im = Image.fromarray(msk[0])
 
     # Save the image
-    filename, file_extension = os.path.splitext(img_name)
-    save_path = COLOR_MASK_SAVE_DIR + filename + '_mask.png'
+    head, tail = os.path.split(img_path)
+    filename, file_extension = os.path.splitext(tail)
+    save_path = COLOR_MASK_SAVE_DIR + filename + '_colormask.png'
     if not os.path.exists(COLOR_MASK_SAVE_DIR):
         os.makedirs(COLOR_MASK_SAVE_DIR)
     im.save(save_path)
     
     print('The output file has been saved to {}'.format(save_path))
+
+
+def infer_and_save_color_map_for_filelist():
+    text_file = open(FILELIST, "r")
+    lines = text_file.read().splitlines()
+    text_file.close()
+
+    for img_name in lines:
+        infer_and_save_color_map(IMAGE_DIR + img_name, MODEL_WEIGHTS, True)
+    return
 
 def infer_absolute_path(img_path, model_weights, use_crf):
     """Create the model and start the evaluation process."""
@@ -195,16 +176,6 @@ def infer_and_save_to_matlab(img_name, labels_name = 'labels.mat'):
     path = MATLAB_SAVE_DIR + labels_name
     scipy.io.savemat(path, mdict={'labels': preds})
     print('The output file has been saved to {}'.format(path))
-
-    return
-
-def infer_and_save_color_map_for_list():
-    text_file = open(FILELIST, "r")
-    lines = text_file.read().splitlines()
-    text_file.close()
-    
-    for img_name in lines:
-        infer_and_save_color_map(img_name)
 
     return
 

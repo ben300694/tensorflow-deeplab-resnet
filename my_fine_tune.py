@@ -22,7 +22,8 @@ import numpy as np
 from deeplab_resnet import DeepLabResNetModel, ImageReader, decode_labels, inv_preprocess, prepare_label
 
 # Load the configuration file
-config = yaml.safe_load(open('config.yml'))
+full_path = os.path.realpath(__file__)
+config = yaml.safe_load(open(os.path.dirname(full_path) + '/config.yml'))
 
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 
@@ -30,7 +31,7 @@ BATCH_SIZE = 4
 DATA_DIRECTORY = config['directories']['DATA_DIRECTORY']
 DATA_TRAIN_LIST_PATH = config['directories']['DATA_TRAIN_LIST_PATH']
 IGNORE_LABEL = config['IGNORE_LABEL']
-INPUT_SIZE = '960,1280'
+INPUT_SIZE = config['INPUT_SIZE']
 LEARNING_RATE = 1e-4
 NUM_CLASSES = config['NUM_CLASSES']
 NUM_STEPS = 800

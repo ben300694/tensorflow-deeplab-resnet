@@ -1,8 +1,17 @@
 # DeepLab-ResNet-TensorFlow
 
-[![Build Status](https://travis-ci.org/DrSleep/tensorflow-deeplab-resnet.svg?branch=master)](https://travis-ci.org/DrSleep/tensorflow-deeplab-resnet)
+This is a fork of 
+an (re-)implementation of [DeepLab-ResNet](http://liangchiehchen.com/projects/DeepLabv2_resnet.html)
+in TensorFlow for semantic image segmentation on the [PASCAL VOC dataset](http://host.robots.ox.ac.uk/pascal/VOC/).
 
-This is an (re-)implementation of [DeepLab-ResNet](http://liangchiehchen.com/projects/DeepLabv2_resnet.html) in TensorFlow for semantic image segmentation on the [PASCAL VOC dataset](http://host.robots.ox.ac.uk/pascal/VOC/).
+
+## Setup
+
+ - Install the requirements like stated [below](#requirements)
+ - Update the path in the configuration file in `config.yml`
+ - Edit the parameters in `config.yml` to the correct values for your data
+ (e.g. input size, number of classes, ignore label, image mean, ...)
+
 
 ## Frequently Asked Questions
 
@@ -23,7 +32,7 @@ Second, tune your hyperparameters. As there are no general strategies that work 
 
 #### I want to use my own dataset. What should I do?
 
-Please refer to this [topic](https://github.com/DrSleep/tensorflow-deeplab-resnet#using-your-dataset).
+Please refer to this [topic](#using-your-dataset).
 
 ## Updates
 
@@ -146,10 +155,11 @@ In order to apply the same scripts using your own dataset, you would need to fol
 6. If restoring weights from the `PASCAL` models for your dataset with a different number of classes, you will also need to pass the `--not-restore-last` flag, which will prevent the last layers of size <code>21</code> from being restored.
 
 
-## Missing features
+## TODOs:
 
-The post-processing step with CRF is currently being implemented [here](https://github.com/DrSleep/tensorflow-deeplab-resnet/tree/crf).
-
+ - [ ] Do not rebuild the network every time an inference is done
+ - [ ] Train the network to infer some geometry about 
+       the scene (maybe depth or surface normals)
     
 ## Other implementations
 * [DeepLab-LargeFOV in TensorFlow](https://github.com/DrSleep/tensorflow-deeplab-lfov)

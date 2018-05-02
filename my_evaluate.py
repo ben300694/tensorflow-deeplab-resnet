@@ -19,7 +19,8 @@ import numpy as np
 from deeplab_resnet import DeepLabResNetModel, ImageReader, prepare_label
 
 # Load the configuration file
-config = yaml.safe_load(open('config.yml'))
+full_path = os.path.realpath(__file__)
+config = yaml.safe_load(open(os.path.dirname(full_path) + '/config.yml'))
 
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 
@@ -28,7 +29,7 @@ DATA_VAL_LIST_PATH = config['directories']['DATA_VAL_LIST_PATH']
 IGNORE_LABEL = config['IGNORE_LABEL']
 NUM_CLASSES = config['NUM_CLASSES']
 NUM_STEPS = config['NUM_VALIDATION_IMAGES'] # Number of images in the validation set.
-RESTORE_FROM = '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune/model_finetuned.ckpt-100'
+RESTORE_FROM = config['RESTORE_FROM']
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
