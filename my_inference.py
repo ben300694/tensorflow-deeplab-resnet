@@ -179,6 +179,66 @@ def infer_and_save_to_matlab(img_name, labels_name = 'labels.mat'):
 
     return
 
+
+def infer_multiple_images(model_weights, use_crf):
+    text_file = open(FILELIST, "r")
+    lines = text_file.read().splitlines()
+    text_file.close()
+
+    img_list = []
+
+    for img_name in lines:
+        # Prepare image.
+        img_orig = tf.image.decode_png(tf.read_file(IMAGE_DIR + img_name), channels=3)
+        # Convert RGB to BGR.
+        img_r, img_g, img_b = tf.split(axis=2, num_or_size_splits=3, value=img_orig)
+        img = tf.cast(tf.concat(axis=2, values=[img_b, img_g, img_r]), dtype=tf.float32)
+        # Extract mean.
+        img -= IMG_MEAN
+        img_list.append(img)
+
+    tf.reset_default_graph()
+
+    # Create network.
+    img_ph = tf.placeholder(tf.float32, shape=[None, None, None, 3])
+    net = DeepLabResNetModel({'data': img_ph}, is_training=False, num_classes=NUM_CLASSES)
+
+    # Which variables to load.
+    restore_var = tf.global_variables()
+
+    # Predictions.
+    raw_output = net.layers['fc1_voc12']
+    raw_output_up = tf.image.resize_bilinear(raw_output, tf.shape(img)[0:2, ])
+
+    # CRF.
+    # if use_crf:
+    #     raw_output_up = tf.nn.softmax(raw_output_up)
+    #     raw_output_up = tf.py_func(dense_crf, [raw_output_up, tf.expand_dims(img_orig, dim=0)], tf.float32)
+
+    # Get maximum score
+    raw_output_up = tf.argmax(raw_output_up, dimension=3)
+    pred = tf.expand_dims(raw_output_up, dim=3)
+
+    # Set up TF session and initialize variables.
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
+    init = tf.global_variables_initializer()
+
+    sess.run(init)
+
+    # Load weights.
+    loader = tf.train.Saver(var_list=restore_var)
+    load(loader, sess, model_weights)
+
+    # Perform inference.
+    # preds is in our test case an object of type numpy.ndarray
+    # with preds.shape = (1, image_height, image_width, 1)
+    # (in our case this was (1, 960, 1280, 1))
+    preds = sess.run(pred, feed_dict={img_ph: img})
+
+    return preds
+
 def main():
     """Create the model and start the evaluation process."""
     args = get_arguments()

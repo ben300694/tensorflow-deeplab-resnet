@@ -20,7 +20,7 @@ colormap_mat = scipy.io.loadmat(MATLAB_COLORMAP_PATH)
 
 # For example use colormap_mat['colorNames'][0][3]
 # to get the names of the classes
-label_colors = colormap_mat['colors']
+label_colors = colormap_mat['colorRGBValues']
 
 
 # # colour map for PASCAL VOC
@@ -49,7 +49,7 @@ label_colors = colormap_mat['colors']
 #                 ]
 
 
-def decode_labels(mask, num_images=1, num_classes=21):
+def decode_labels(mask, num_images=1, num_classes=NUM_CLASSES):
     """Decode batch of segmentation masks.
     
     Args:
@@ -69,7 +69,7 @@ def decode_labels(mask, num_images=1, num_classes=21):
       for j_, j in enumerate(mask[i, :, :, 0]):
           for k_, k in enumerate(j):
               if k < num_classes:
-                  pixels[k_,j_] = label_colours[k]
+                  pixels[k_,j_] = tuple(label_colors[k])
       outputs[i] = np.array(img)
     return outputs
 

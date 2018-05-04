@@ -1,6 +1,6 @@
 directories:
   DATA_DIRECTORY: '/media/data/bruppik/deeplab_resnet_test_dataset'
-  DATA_FILELIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/filelist.txt'
+  DATA_FILELIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/filelist_small.txt'
   DATA_VAL_LIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/val.txt'
   DATA_TRAIN_LIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/train.txt'
   IMAGE_DIR: '/media/data/bruppik/deeplab_resnet_test_dataset/images/'
