@@ -35,6 +35,8 @@ MODEL_WEIGHTS = config['RESTORE_FROM']
 
 FILELIST = config['directories']['DATA_FILELIST_PATH']
 
+BATCH_SIZE = 3
+
 def get_arguments():
     """Parse all the arguments provided from the CLI.
     
@@ -166,6 +168,11 @@ def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_pa
     
     return
 
+
+"""
+Assumption: All the images referenced in the file list have the same dimension
+
+"""
 def infer_and_save_to_matlab(img_name, labels_name = 'labels.mat'):
     # Predict the labels    
     preds = infer(img_name)
@@ -180,7 +187,13 @@ def infer_and_save_to_matlab(img_name, labels_name = 'labels.mat'):
     return
 
 
-def infer_multiple_images(model_weights, use_crf):
+# TODO Finish writing this function
+def infer_multiple_images(model_weights, use_crf=False):
+    tf.reset_default_graph()
+
+    # Create queue coordinator.
+    coord = tf.train.Coordinator()
+
     text_file = open(FILELIST, "r")
     lines = text_file.read().splitlines()
     text_file.close()
@@ -197,23 +210,31 @@ def infer_multiple_images(model_weights, use_crf):
         img -= IMG_MEAN
         img_list.append(img)
 
-    tf.reset_default_graph()
+    img_tensor = tf.convert_to_tensor(img_list, dtype=tf.float32)
+
+    image_dataset = tf.data.Dataset.from_tensor_slices(img_tensor)
+    image_batch = image_dataset.batch(BATCH_SIZE)
+    print(image_dataset)
+    print(image_batch)
+
+    # create the iterator
+    iter = image_batch.make_one_shot_iterator()
+    data = iter.get_next()
 
     # Create network.
-    img_ph = tf.placeholder(tf.float32, shape=[None, None, None, 3])
-    net = DeepLabResNetModel({'data': img_ph}, is_training=False, num_classes=NUM_CLASSES)
+    net = DeepLabResNetModel({'data': data}, is_training=False, num_classes=NUM_CLASSES)
 
     # Which variables to load.
     restore_var = tf.global_variables()
 
     # Predictions.
     raw_output = net.layers['fc1_voc12']
-    raw_output_up = tf.image.resize_bilinear(raw_output, tf.shape(img)[0:2, ])
+    raw_output_up = tf.image.resize_bilinear(raw_output, tf.shape(img_list[0])[0:2, ])
 
     # CRF.
     # if use_crf:
     #     raw_output_up = tf.nn.softmax(raw_output_up)
-    #     raw_output_up = tf.py_func(dense_crf, [raw_output_up, tf.expand_dims(img_orig, dim=0)], tf.float32)
+    #     raw_output_up = tf.py_func(dense_crf, [raw_output_up, tf.expand_dims(img_ph, dim=0)], tf.float32)
 
     # Get maximum score
     raw_output_up = tf.argmax(raw_output_up, dimension=3)
@@ -233,10 +254,15 @@ def infer_multiple_images(model_weights, use_crf):
 
     # Perform inference.
     # preds is in our test case an object of type numpy.ndarray
-    # with preds.shape = (1, image_height, image_width, 1)
-    # (in our case this was (1, 960, 1280, 1))
-    preds = sess.run(pred, feed_dict={img_ph: img})
+    # with preds.shape = (number_of_images, image_height, image_width, 1)
+    # (in our case this was (?, 960, 1280, 1))
+    batch_results = []
+    for i in range(len(lines) / BATCH_SIZE):
+        batch_results.append(sess.run(pred))
 
+    preds = tf.concat(batch_results, axis=0)
+
+    print(preds.eval(session=sess))
     return preds
 
 def main():

@@ -77,7 +77,12 @@ For more details on the underlying model please refer to the following paper:
 ## Requirements
 
 TensorFlow needs to be installed before running the scripts.
-TensorFlow v1.1.0 is supported; for TensorFlow v0.12 please refer to this [branch](https://github.com/DrSleep/tensorflow-deeplab-resnet/tree/tf-0.12); for TensorFlow v0.11 please refer to this [branch](https://github.com/DrSleep/tensorflow-deeplab-resnet/tree/tf-0.11). Note that those branches may not have the same functional as the current master. 
+TensorFlow v1.1.0 is supported;
+for TensorFlow v0.12 please refer to this
+[branch](https://github.com/DrSleep/tensorflow-deeplab-resnet/tree/tf-0.12);
+for TensorFlow v0.11 please refer to this
+[branch](https://github.com/DrSleep/tensorflow-deeplab-resnet/tree/tf-0.11).
+Note that those branches may not have the same functional as the current master. 
 
 To install the required python packages (except TensorFlow), run
 ```bash
@@ -86,6 +91,11 @@ pip install -r requirements.txt
 or for a local installation
 ```bash
 pip install -user -r requirements.txt
+```
+
+You will also need the `pydensecrf` package, for this
+```bash
+pip install pydensecrf
 ```
 
 ## Caffe to TensorFlow conversion
