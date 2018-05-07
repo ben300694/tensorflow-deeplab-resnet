@@ -35,7 +35,7 @@ MODEL_WEIGHTS = config['RESTORE_FROM']
 
 FILELIST = config['directories']['DATA_FILELIST_PATH']
 
-BATCH_SIZE = 3
+BATCH_SIZE = 6
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -66,7 +66,7 @@ def load(saver, sess, ckpt_path):
     print("Restored model parameters from {}".format(ckpt_path))
 
 
-def infer_and_save_color_map(img_path, model_weights, use_crf):
+def infer_and_save_colormask(img_path, model_weights, use_crf):
 
     # Perform inference.
     preds = infer_absolute_path(img_path, model_weights, use_crf)
@@ -87,13 +87,66 @@ def infer_and_save_color_map(img_path, model_weights, use_crf):
     print('The output file has been saved to {}'.format(save_path))
 
 
-def infer_and_save_color_map_for_filelist():
-    text_file = open(FILELIST, "r")
+def infer_and_save_colormask_for_filelist(filelist=FILELIST,
+                                          model_weights=MODEL_WEIGHTS):
+    text_file = open(filelist, "r")
     lines = text_file.read().splitlines()
     text_file.close()
 
     for img_name in lines:
-        infer_and_save_color_map(IMAGE_DIR + img_name, MODEL_WEIGHTS, True)
+        infer_and_save_colormask(IMAGE_DIR + img_name, model_weights, True)
+    return
+
+
+def infer_and_save_colormask_and_matlab_for_filelist(filelist=FILELIST,
+                                                     color_mask_save_dir=COLOR_MASK_SAVE_DIR,
+                                                     matlab_save_dir=MATLAB_SAVE_DIR,
+                                                     model_weights=MODEL_WEIGHTS,
+                                                     use_crf=False):
+    # Open and parse the filelist
+    text_file = open(filelist, "r")
+    lines = text_file.read().splitlines()
+    text_file.close()
+
+    # Perform inference.
+    print('Starting inference')
+    preds = infer_multiple_images(filelist, model_weights, use_crf)
+
+    # Get the color values for the labels
+    print('Decoding the labels')
+    masks = decode_labels(preds, num_images=preds.shape[0], num_classes=NUM_CLASSES)
+
+    # Prepare the location for saving the colormask
+    if use_crf == True:
+        crf_used_string = 'with_crf'
+    else:
+        crf_used_string = ''
+
+    if not os.path.exists(color_mask_save_dir):
+        os.makedirs(color_mask_save_dir)
+    if not os.path.exists(matlab_save_dir):
+        os.makedirs(matlab_save_dir)
+
+    # TODO remove the '.png' from the filenames
+    for index, img_name in enumerate(lines):
+        # Save the colormask as png
+        im = Image.fromarray(masks[index])
+        colormask_save_path = color_mask_save_dir + img_name + crf_used_string + '_colormask.png'
+        im.save(colormask_save_path)
+        print('The colormask has been saved to {}'.format(colormask_save_path))
+
+        # TODO Check if the MATLAB save function is correctly working here
+        # Save the mask as matlab .mat
+        matlab_labels_save_path = matlab_save_dir + img_name + '.mat'
+        if use_crf == False:
+            scipy.io.savemat(matlab_labels_save_path, mdict={'labels': preds.astype(np.uint16)})
+            print('The matlab file has been saved to {}'.format(matlab_labels_save_path))
+            continue
+        # preds_crf = infer_absolute_path(img_absolute_path, model_weights, use_crf=True)
+        # scipy.io.savemat(labels_absolute_path,
+        #                  mdict={'labels': preds.astype(np.uint16), 'labels_crf': preds_crf.astype(np.uint16)})
+        # print('The output file has been saved to {}'.format(labels_absolute_path))
+
     return
 
 def infer_absolute_path(img_path, model_weights, use_crf):
@@ -153,48 +206,19 @@ def infer_absolute_path(img_path, model_weights, use_crf):
 def infer(img_name, model_weights):
     return infer_absolute_path(IMAGE_DIR + img_name, model_weights)
 
-def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_path, model_weights, use_crf):
-    # Predict the labels
-    preds = infer_absolute_path(img_absolute_path, model_weights, use_crf=False)
-    
-    if use_crf == False:    
-        scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16)})
-        print('The output file has been saved to {}'.format(labels_absolute_path))
-        return
-    
-    preds_crf = infer_absolute_path(img_absolute_path, model_weights, use_crf=True)
-    scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16), 'labels_crf': preds_crf.astype(np.uint16)})
-    print('The output file has been saved to {}'.format(labels_absolute_path))
-    
-    return
-
 
 """
 Assumption: All the images referenced in the file list have the same dimension
-
 """
-def infer_and_save_to_matlab(img_name, labels_name = 'labels.mat'):
-    # Predict the labels    
-    preds = infer(img_name)
-
-    if not os.path.exists(MATLAB_SAVE_DIR):
-        os.makedirs(MATLAB_SAVE_DIR)
-    
-    path = MATLAB_SAVE_DIR + labels_name
-    scipy.io.savemat(path, mdict={'labels': preds})
-    print('The output file has been saved to {}'.format(path))
-
-    return
 
 
-# TODO Finish writing this function
-def infer_multiple_images(model_weights, use_crf=False):
+def infer_multiple_images(filelist=FILELIST, model_weights=MODEL_WEIGHTS, use_crf=False):
     tf.reset_default_graph()
 
     # Create queue coordinator.
     coord = tf.train.Coordinator()
 
-    text_file = open(FILELIST, "r")
+    text_file = open(filelist, "r")
     lines = text_file.read().splitlines()
     text_file.close()
 
@@ -214,8 +238,8 @@ def infer_multiple_images(model_weights, use_crf=False):
 
     image_dataset = tf.data.Dataset.from_tensor_slices(img_tensor)
     image_batch = image_dataset.batch(BATCH_SIZE)
-    print(image_dataset)
-    print(image_batch)
+    # print(image_dataset)
+    # print(image_batch)
 
     # create the iterator
     iter = image_batch.make_one_shot_iterator()
@@ -231,6 +255,7 @@ def infer_multiple_images(model_weights, use_crf=False):
     raw_output = net.layers['fc1_voc12']
     raw_output_up = tf.image.resize_bilinear(raw_output, tf.shape(img_list[0])[0:2, ])
 
+    # TODO Finish writing this function
     # CRF.
     # if use_crf:
     #     raw_output_up = tf.nn.softmax(raw_output_up)
@@ -257,13 +282,43 @@ def infer_multiple_images(model_weights, use_crf=False):
     # with preds.shape = (number_of_images, image_height, image_width, 1)
     # (in our case this was (?, 960, 1280, 1))
     batch_results = []
-    for i in range(len(lines) / BATCH_SIZE):
+    number_of_batches = len(lines) / BATCH_SIZE
+    for i in range(number_of_batches + 1):
         batch_results.append(sess.run(pred))
+        print('Done with batch ' + str(i) + ' of ' + str(number_of_batches))
 
-    preds = tf.concat(batch_results, axis=0)
+    print('Concatenating batches')
+    preds = np.concatenate(batch_results, axis=0)
 
-    print(preds.eval(session=sess))
     return preds
+
+def infer_and_save_to_matlab_absolute_path(img_absolute_path, labels_absolute_path, model_weights, use_crf):
+    # Predict the labels
+    preds = infer_absolute_path(img_absolute_path, model_weights, use_crf=False)
+    
+    if use_crf == False:    
+        scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16)})
+        print('The output file has been saved to {}'.format(labels_absolute_path))
+        return
+    
+    preds_crf = infer_absolute_path(img_absolute_path, model_weights, use_crf=True)
+    scipy.io.savemat(labels_absolute_path, mdict={'labels': preds.astype(np.uint16), 'labels_crf': preds_crf.astype(np.uint16)})
+    print('The output file has been saved to {}'.format(labels_absolute_path))
+    
+    return
+
+def infer_and_save_to_matlab(img_name, labels_name = 'labels.mat'):
+    # Predict the labels    
+    preds = infer(img_name)
+
+    if not os.path.exists(MATLAB_SAVE_DIR):
+        os.makedirs(MATLAB_SAVE_DIR)
+    
+    path = MATLAB_SAVE_DIR + labels_name
+    scipy.io.savemat(path, mdict={'labels': preds})
+    print('The output file has been saved to {}'.format(path))
+
+    return
 
 def main():
     """Create the model and start the evaluation process."""

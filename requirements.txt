@@ -4,3 +4,5 @@ matplotlib>=1.3.1
 Pillow>=2.3.0
 six>=1.1.0
 pydensecrf
+scipy
+pyyaml

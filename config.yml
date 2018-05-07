@@ -1,15 +1,15 @@
 directories:
-  DATA_DIRECTORY: '/media/data/bruppik/deeplab_resnet_test_dataset'
-  DATA_FILELIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/filelist_small.txt'
-  DATA_VAL_LIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/val.txt'
-  DATA_TRAIN_LIST_PATH: '/media/data/bruppik/deeplab_resnet_test_dataset/train.txt'
-  IMAGE_DIR: '/media/data/bruppik/deeplab_resnet_test_dataset/images/'
-  SNAPSHOT_DIRECTORY: '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune/'
-  MATLAB_SAVE_DIR: '/media/data/bruppik/deeplab_resnet_test_dataset/matlab_files/'
-  COLOR_MASK_SAVE_DIR: '/media/data/bruppik/deeplab_resnet_test_dataset/color_mask_output/'
+  DATA_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset'
+  DATA_FILELIST_PATH: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/filelist_small.txt'
+  DATA_VAL_LIST_PATH: '/media/data/bruppik/cvg11/cvg11/deeplab_resnet_test_dataset/val.txt'
+  DATA_TRAIN_LIST_PATH: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/train.txt'
+  IMAGE_DIR: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/images/'
+  SNAPSHOT_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/snapshots_finetune/'
+  MATLAB_SAVE_DIR: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/matlab_files/'
+  COLOR_MASK_SAVE_DIR: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/color_mask_output/'
   MATLAB_COLORMAP_PATH: '/media/remote_home/bruppik/git-source/ben300694/semanticLabelingTool/colormap.mat'
 INPUT_SIZE: '960,1280'
 IGNORE_LABEL: 255
 NUM_CLASSES: 27
 NUM_VALIDATION_IMAGES: 3
-RESTORE_FROM: '/media/data/bruppik/deeplab_resnet_test_dataset/snapshots_finetune/model_finetuned.ckpt-300'
+RESTORE_FROM: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/snapshots_finetune/model_finetuned.ckpt-300'
