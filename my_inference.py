@@ -30,7 +30,7 @@ NUM_CLASSES = config['NUM_CLASSES']
 
 IMAGE_DIR = config['directories']['IMAGE_DIR']
 COLOR_MASK_SAVE_DIR = config['directories']['COLOR_MASK_SAVE_DIR']
-MATLAB_SAVE_DIR = config['directories']['MATLAB_SAVE_DIR']
+MATLAB_SAVE_DIR = config['directories']['inference']['MATLAB_SAVE_DIRECTORY']
 MODEL_WEIGHTS = config['RESTORE_FROM']
 
 FILELIST = config['directories']['DATA_FILELIST_PATH']
