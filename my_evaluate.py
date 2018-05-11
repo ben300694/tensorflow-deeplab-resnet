@@ -25,7 +25,7 @@ config = yaml.safe_load(open(os.path.dirname(full_path) + '/config.yml'))
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 
 DATA_DIRECTORY = config['directories']['DATA_DIRECTORY']
-DATA_VAL_LIST_PATH = config['directories']['DATA_VAL_LIST_PATH']
+DATA_VAL_LIST_PATH = config['directories']['lists']['DATA_VAL_LIST_PATH']
 IGNORE_LABEL = config['IGNORE_LABEL']
 NUM_CLASSES = config['NUM_CLASSES']
 NUM_STEPS = config['NUM_VALIDATION_IMAGES'] # Number of images in the validation set.

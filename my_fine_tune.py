@@ -29,7 +29,7 @@ IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 
 BATCH_SIZE = 4
 DATA_DIRECTORY = config['directories']['DATA_DIRECTORY']
-DATA_TRAIN_LIST_PATH = config['directories']['DATA_TRAIN_LIST_PATH']
+DATA_TRAIN_LIST_PATH = config['directories']['lists']['DATA_TRAIN_LIST_PATH']
 IGNORE_LABEL = config['IGNORE_LABEL']
 INPUT_SIZE = config['INPUT_SIZE']
 LEARNING_RATE = 1e-4
@@ -40,7 +40,7 @@ RESTORE_FROM = '/media/data/bruppik/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
 SAVE_NUM_IMAGES = 3
 SAVE_PRED_EVERY = 50
 SAVE_SUMMARY_EVERY = 25
-SNAPSHOT_DIRECTORY = config['directories']['SNAPSHOT_DIRECTORY']
+SNAPSHOT_DIRECTORY = config['directories']['training']['SNAPSHOT_DIRECTORY']
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
