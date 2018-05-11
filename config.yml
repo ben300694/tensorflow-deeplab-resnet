@@ -10,7 +10,7 @@ directories:
   inference:
     MATLAB_SAVE_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/matlab_files/'
   lists:
-    DATA_FILELIST_PATH: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/filelist_seq2.txt'
+    DATA_FILELIST_PATH: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/filelist_medium.txt'
     DATA_VAL_LIST_PATH: '/media/data/bruppik/cvg11/cvg11/deeplab_resnet_test_dataset/val.txt'
     DATA_TRAIN_LIST_PATH: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/train.txt'
   training:

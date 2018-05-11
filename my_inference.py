@@ -228,6 +228,7 @@ def infer_multiple_images(filelist=FILELIST, model_weights=MODEL_WEIGHTS, use_cr
         # Extract mean.
         img -= IMG_MEAN
         img_list.append(img)
+        # print('Read image {}'.format(img_name))
 
     img_tensor = tf.convert_to_tensor(img_list, dtype=tf.float32)
 
@@ -235,6 +236,7 @@ def infer_multiple_images(filelist=FILELIST, model_weights=MODEL_WEIGHTS, use_cr
     image_batch = image_dataset.batch(BATCH_SIZE)
     # print(image_dataset)
     # print(image_batch)
+    print('Image preprocessing done')
 
     # create the iterator
     iter = image_batch.make_one_shot_iterator()
@@ -257,7 +259,7 @@ def infer_multiple_images(filelist=FILELIST, model_weights=MODEL_WEIGHTS, use_cr
     #     raw_output_up = tf.py_func(dense_crf, [raw_output_up, tf.expand_dims(img_ph, dim=0)], tf.float32)
 
     # Get maximum score
-    raw_output_up = tf.argmax(raw_output_up, dimension=3)
+    raw_output_up = tf.argmax(raw_output_up, axis=3)
     pred = tf.expand_dims(raw_output_up, dim=3)
 
     # Set up TF session and initialize variables.
