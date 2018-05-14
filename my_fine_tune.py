@@ -1,5 +1,7 @@
-"""Training script for the DeepLab-ResNet network on the PASCAL VOC dataset
-   for semantic image segmentation.
+"""
+Fine tuning script for the DeepLab-ResNet network
+on a dataset of your choice
+for semantic image segmentation.
 
 This script fine-tunes the model using
 a custom dataset.
@@ -34,10 +36,10 @@ IGNORE_LABEL = config['IGNORE_LABEL']
 INPUT_SIZE = config['INPUT_SIZE']
 LEARNING_RATE = 1e-4
 NUM_CLASSES = config['NUM_CLASSES']
-NUM_STEPS = 800
+NUM_STEPS = 1000
 RANDOM_SEED = 1234
-RESTORE_FROM = '/media/data/bruppik/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
-SAVE_NUM_IMAGES = 3
+RESTORE_FROM = config['directories']['WEIGHTS_TRAINED_ON_PASCAL_VOC']
+SAVE_NUM_IMAGES = 4
 SAVE_PRED_EVERY = 50
 SAVE_SUMMARY_EVERY = 25
 SNAPSHOT_DIRECTORY = config['directories']['training']['SNAPSHOT_DIRECTORY']

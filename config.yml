@@ -3,6 +3,9 @@ directories:
   IMAGE_DIR: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/images/'
   COLOR_MASK_SAVE_DIR: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/color_mask_output/'
   MATLAB_COLORMAP_PATH: '/media/remote_home/bruppik/git-source/ben300694/semanticLabelingTool/colormap.mat'
+
+  WEIGHTS_TRAINED_ON_PASCAL_VOC: '/media/data/bruppik/cvg11/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
+
   annotations:
     ANNO_FREE_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/annotations_Free/'
     ANNO_PNG_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/annotations_PNG/'
