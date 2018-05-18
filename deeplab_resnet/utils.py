@@ -31,30 +31,47 @@ label_colors = colormap_mat['colorRGBValues']
 # including the ignore label.
 label_colors = np.insert(label_colors, 0, np.array([255, 255, 255]), axis=0)
 
-# # colour map for PASCAL VOC
-# label_colours = [(0,0,0)
-#                 # 0=background
-#                 ,(128,0,0),(0,128,0),(128,128,0),(0,0,128),(128,0,128)
-#                 # 1=aeroplane, 2=bicycle, 3=bird, 4=boat, 5=bottle
-#                 ,(0,128,128),(128,128,128),(64,0,0),(192,0,0),(64,128,0)
-#                 # 6=bus, 7=car, 8=cat, 9=chair, 10=cow
-#                 ,(192,128,0),(64,0,128),(192,0,128),(64,128,128),(192,128,128)
-#                 # 11=diningtable, 12=dog, 13=horse, 14=motorbike, 15=person
-#                 ,(0,64,0),(128,64,0),(0,192,0),(128,192,0),(0,64,128)
-#                 # 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor
-#                 ,(0,0,192)
-#                 # 21
-#                 ,(0,192,0)
-#                 # 22
-#                 ,(0,0,0)
-#                 # 23
-#                 ,(0,0,0)
-#                 # 24
-#                 ,(0,0,0)
-#                 # 25
-#                 ,(0,0,0)
-#                 # 26
-#                 ]
+# # Color map for the example of labeling drone images
+# # is now after prepending the IGNORE_LABEL:
+#
+# label_colors = [[255, 255, 255],
+#                 # 0 = undefined
+#                 [0, 0, 0],
+#                 # 1 = Background
+#                 [0, 0, 182],
+#                 # 2 = Pedestrian
+#                 [0, 0, 219],
+#                 # 3 = Bicyclist
+#                 [0, 0, 255],
+#                 # 4 =
+#                 [0, 36, 255],
+#                 # 5 =
+#                 [0, 73, 255],
+#                 # 6 =
+#                 [0, 109, 255],
+#                 # 7 =
+#                 [0, 146, 255],
+#                 # 8 =
+#                 [0, 182, 255],
+#                 [0, 219, 255],
+#                 [0, 255, 255],
+#                 [36, 255, 219],
+#                 [73, 255, 182],
+#                 [109, 255, 146],
+#                 [146, 255, 109],
+#                 [182, 255, 73],
+#                 [219, 255, 36],
+#                 [255, 255, 0],
+#                 [255, 219, 0],
+#                 [255, 182, 0],
+#                 [255, 146, 0],
+#                 [255, 109, 0],
+#                 [255, 73, 0],
+#                 [255, 36, 0],
+#                 [255, 0, 0],
+#                 [219, 0, 0],
+#                 [0, 0, 146]]
+#                 # 27 = Drone
 
 
 def decode_labels(mask, num_images=1, num_classes=NUM_CLASSES):
@@ -69,17 +86,19 @@ def decode_labels(mask, num_images=1, num_classes=NUM_CLASSES):
       A batch with num_images RGB images of the same size as the input. 
     """
     n, h, w, c = mask.shape
-    assert(n >= num_images), 'Batch size %d should be greater or equal than number of images to save %d.' % (n, num_images)
+    assert (n >= num_images), 'Batch size %d should be greater or equal than number of images to save %d.' % (
+    n, num_images)
     outputs = np.zeros((num_images, h, w, 3), dtype=np.uint8)
     for i in range(num_images):
-      img = Image.new('RGB', (len(mask[i, 0]), len(mask[i])))
-      pixels = img.load()
-      for j_, j in enumerate(mask[i, :, :, 0]):
-          for k_, k in enumerate(j):
-              if k < num_classes:
-                  pixels[k_,j_] = tuple(label_colors[k])
-      outputs[i] = np.array(img)
+        img = Image.new('RGB', (len(mask[i, 0]), len(mask[i])))
+        pixels = img.load()
+        for j_, j in enumerate(mask[i, :, :, 0]):
+            for k_, k in enumerate(j):
+                if k < num_classes:
+                    pixels[k_, j_] = tuple(label_colors[k])
+        outputs[i] = np.array(img)
     return outputs
+
 
 def prepare_label(input_batch, new_size, num_classes=NUM_CLASSES, one_hot=True):
     """Resize masks and perform one-hot encoding.
@@ -95,11 +114,13 @@ def prepare_label(input_batch, new_size, num_classes=NUM_CLASSES, one_hot=True):
       with last dimension comprised of 0's and 1's only.
     """
     with tf.name_scope('label_encode'):
-        input_batch = tf.image.resize_nearest_neighbor(input_batch, new_size) # as labels are integer numbers, need to use NN interp.
-        input_batch = tf.squeeze(input_batch, squeeze_dims=[3]) # reducing the channel dimension.
+        input_batch = tf.image.resize_nearest_neighbor(input_batch,
+                                                       new_size)  # as labels are integer numbers, need to use NN interp.
+        input_batch = tf.squeeze(input_batch, squeeze_dims=[3])  # reducing the channel dimension.
         if one_hot:
             input_batch = tf.one_hot(input_batch, depth=num_classes)
     return input_batch
+
 
 def inv_preprocess(imgs, num_images, img_mean):
     """Inverse preprocessing of the batch of images.
@@ -114,13 +135,15 @@ def inv_preprocess(imgs, num_images, img_mean):
       The batch of the size num_images with the same spatial dimensions as the input.
     """
     n, h, w, c = imgs.shape
-    assert(n >= num_images), 'Batch size %d should be greater or equal than number of images to save %d.' % (n, num_images)
+    assert (n >= num_images), 'Batch size %d should be greater or equal than number of images to save %d.' % (
+    n, num_images)
     outputs = np.zeros((num_images, h, w, c), dtype=np.uint8)
     for i in range(num_images):
         outputs[i] = (imgs[i] + img_mean)[:, :, ::-1].astype(np.uint8)
     return outputs
 
-def dense_crf(probs, img=None, n_iters=10, 
+
+def dense_crf(probs, img=None, n_iters=10,
               sxy_gaussian=(1, 1), compat_gaussian=4,
               kernel_gaussian=dcrf.DIAG_KERNEL,
               normalisation_gaussian=dcrf.NORMALIZE_SYMMETRIC,
@@ -151,17 +174,17 @@ def dense_crf(probs, img=None, n_iters=10,
       Refined predictions after MAP inference.
     """
     _, h, w, _ = probs.shape
-    
-    probs = probs[0].transpose(2, 0, 1).copy(order='C') # Need a contiguous array.
+
+    probs = probs[0].transpose(2, 0, 1).copy(order='C')  # Need a contiguous array.
 
     d = dcrf.DenseCRF2D(w, h, NUM_CLASSES)  # Define DenseCRF model.
-    U = -np.log(probs) # Unary potential.
+    U = -np.log(probs)  # Unary potential.
     U = U.reshape((NUM_CLASSES, -1))  # Needs to be flat.
     d.setUnaryEnergy(U)
     d.addPairwiseGaussian(sxy=sxy_gaussian, compat=compat_gaussian,
                           kernel=kernel_gaussian, normalization=normalisation_gaussian)
     if img is not None:
-        assert(img.shape[1:3] == (h, w)), "The image height and width must coincide with dimensions of the logits."
+        assert (img.shape[1:3] == (h, w)), "The image height and width must coincide with dimensions of the logits."
         d.addPairwiseBilateral(sxy=sxy_bilateral, compat=compat_bilateral,
                                kernel=kernel_bilateral, normalization=normalisation_bilateral,
                                srgb=srgb_bilateral, rgbim=img[0])
