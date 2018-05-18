@@ -73,7 +73,7 @@ def decode_labels(mask, num_images=1, num_classes=NUM_CLASSES):
       outputs[i] = np.array(img)
     return outputs
 
-def prepare_label(input_batch, new_size, num_classes, one_hot=True):
+def prepare_label(input_batch, new_size, num_classes=NUM_CLASSES, one_hot=True):
     """Resize masks and perform one-hot encoding.
 
     Args:
@@ -83,7 +83,7 @@ def prepare_label(input_batch, new_size, num_classes, one_hot=True):
       one_hot: whether perform one-hot encoding.
 
     Returns:
-      Outputs a tensor of shape [batch_size h w 21]
+      Outputs a tensor of shape [batch_size h w num_classes]
       with last dimension comprised of 0's and 1's only.
     """
     with tf.name_scope('label_encode'):

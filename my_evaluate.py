@@ -1,7 +1,13 @@
-"""Evaluation script for the DeepLab-ResNet network on the validation subset
-   of PASCAL VOC dataset.
+"""
+Evaluation script for the DeepLab-ResNet network on a validation subset
+of your dataset.
 
-This script evaluates the model on 1449 validation images.
+This script evaluates the model on the validation images
+specified in the DATA_VAL_LIST_PATH in the config file.
+
+Do not forget to also change
+NUM_VALIDATION_IMAGES
+in the config file to the appropriate value!
 """
 
 from __future__ import print_function
@@ -29,6 +35,7 @@ DATA_VAL_LIST_PATH = config['directories']['lists']['DATA_VAL_LIST_PATH']
 IGNORE_LABEL = config['IGNORE_LABEL']
 NUM_CLASSES = config['NUM_CLASSES']
 NUM_STEPS = config['NUM_VALIDATION_IMAGES'] # Number of images in the validation set.
+
 RESTORE_FROM = config['RESTORE_FROM']
 
 def get_arguments():
@@ -99,9 +106,12 @@ def main():
     
     # mIoU
     pred = tf.reshape(pred, [-1,])
-    gt = tf.reshape(label_batch, [-1,])
-    weights = tf.cast(tf.less_equal(gt, args.num_classes - 1), tf.int32) # Ignoring all labels greater than or equal to n_classes.
-    mIoU, update_op = tf.contrib.metrics.streaming_mean_iou(pred, gt, num_classes=args.num_classes, weights=weights)
+    ground_truth = tf.reshape(label_batch, [-1,])
+    weights = tf.cast(tf.less_equal(ground_truth, args.num_classes - 1), tf.int32) # Ignoring all labels greater than or equal to n_classes.
+
+    # mIoU, update_op = tf.contrib.metrics.streaming_mean_iou(pred, ground_truth, num_classes=args.num_classes,
+    #                                                         weights=weights)
+    mIoU, update_op = tf.contrib.metrics.streaming_mean_iou(pred, ground_truth, num_classes=args.num_classes)
     
     # Set up tf session and initialize variables. 
     config = tf.ConfigProto()
