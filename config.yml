@@ -21,7 +21,9 @@ directories:
 
 # Properties of the image and labels
 INPUT_SIZE: '960,1280'
-IGNORE_LABEL: 255
+# In the MATLAB semanticLabelingTool the class
+# 'undefined' is labeled with index '0'
+IGNORE_LABEL: 0
 
 # NUM_CLASSES is the actual number of classes, so if your classes
 # are indexed by 0, 1, ..., 27 you should set NUM_CLASSES = 28

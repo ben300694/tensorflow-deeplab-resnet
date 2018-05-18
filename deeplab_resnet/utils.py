@@ -22,6 +22,14 @@ colormap_mat = scipy.io.loadmat(MATLAB_COLORMAP_PATH)
 # to get the names of the classes
 label_colors = colormap_mat['colorRGBValues']
 
+# The MATLAB colormap.mat starts indexed at 1 and contains the
+# labels 'background' = 1, ... , 'drone' =27
+# The ignore-label in the MATLAB Label tool is '0'
+# and not contained in the colormat.mat
+# So we are adding the element [255, 255, 255]
+# in the front of label_colors to get a colormap
+# including the ignore label.
+label_colors = np.insert(label_colors, 0, np.array([255, 255, 255]), axis=0)
 
 # # colour map for PASCAL VOC
 # label_colours = [(0,0,0)
