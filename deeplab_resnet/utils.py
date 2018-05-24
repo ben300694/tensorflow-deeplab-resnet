@@ -18,8 +18,10 @@ MATLAB_COLORMAP_PATH = config['directories']['MATLAB_COLORMAP_PATH']
 # Read in the matlab file containing the color map
 colormap_mat = scipy.io.loadmat(MATLAB_COLORMAP_PATH)
 
-# For example use colormap_mat['colorNames'][0][3]
+# For example use colormap_mat['colorNames'][3]
 # to get the names of the classes
+
+# Loads the label colors from the colormap.mat
 label_colors = colormap_mat['colorRGBValues']
 
 # The MATLAB colormap.mat starts indexed at 1 and contains the

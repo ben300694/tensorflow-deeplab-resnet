@@ -31,4 +31,4 @@ NUM_CLASSES: 28
 NUM_VALIDATION_IMAGES: 1
 
 # File that is used for restoring weights of the network
-RESTORE_FROM: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/snapshots_finetune/model_finetuned.ckpt-50'
+RESTORE_FROM: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/snapshots_finetune/model_finetuned.ckpt-1000'
