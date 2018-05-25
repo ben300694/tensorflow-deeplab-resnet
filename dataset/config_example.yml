@@ -1,0 +1,34 @@
+directories:
+  DATA_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/'
+  IMAGE_DIR: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/images/'
+  COLOR_MASK_SAVE_DIR: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/color_mask_output/'
+  MATLAB_COLORMAP_PATH: '/media/remote_home/bruppik/git-source/ben300694/semanticLabelingTool/colormap.mat'
+
+  WEIGHTS_TRAINED_ON_PASCAL_VOC: '/media/data/bruppik/cvg11/deeplab_resnet_ckpt/deeplab_resnet.ckpt'
+
+  annotations:
+    ANNO_FREE_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/annotations_Free/'
+    ANNO_PNG_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/annotations_PNG/'
+    ANNO_SUPERPIXELS_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/annotations_Superpixels/'
+  inference:
+    MATLAB_SAVE_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/matlab_files/'
+  lists:
+    DATA_FILELIST_PATH: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/filelist_medium.txt'
+    DATA_VAL_LIST_PATH: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/val.txt'
+    DATA_TRAIN_LIST_PATH: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/train.txt'
+  training:
+    SNAPSHOT_DIRECTORY: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/snapshots_finetune/'
+
+# Properties of the image and labels
+INPUT_SIZE: '960,1280'
+# In the MATLAB semanticLabelingTool the class
+# 'undefined' is labeled with index '0'
+IGNORE_LABEL: 0
+
+# NUM_CLASSES is the actual number of classes, so if your classes
+# are indexed by 0, 1, ..., 27 you should set NUM_CLASSES = 28
+NUM_CLASSES: 28
+NUM_VALIDATION_IMAGES: 1
+
+# File that is used for restoring weights of the network
+RESTORE_FROM: '/media/data/bruppik/cvg11/deeplab_resnet_test_dataset/snapshots_finetune/model_finetuned.ckpt-1000'
