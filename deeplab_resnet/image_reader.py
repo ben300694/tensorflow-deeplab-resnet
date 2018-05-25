@@ -38,7 +38,7 @@ def image_mirroring(img, label):
     label = tf.reverse(label, mirror)
     return img, label
 
-def random_crop_and_pad_image_and_labels(image, label, crop_h, crop_w, ignore_label=255):
+def random_crop_and_pad_image_and_labels(image, label, crop_h, crop_w, ignore_label):
     """
     Randomly crop and pads the input images.
 
@@ -89,6 +89,10 @@ def read_labeled_image_list(data_dir, data_list):
             image = mask = line.strip("\n")
         images.append(data_dir + image)
         masks.append(data_dir + mask)
+    # print("images:")
+    # print(images)
+    # print("masks:")
+    # print(masks)
     return images, masks
 
 def read_images_from_disk(input_queue, input_size, random_scale, random_mirror, ignore_label, img_mean): # optional pre-processing arguments
@@ -119,7 +123,7 @@ def read_images_from_disk(input_queue, input_size, random_scale, random_mirror, 
     img -= img_mean
 
     label = tf.image.decode_png(label_contents, channels=1, dtype=tf.uint8)
-    print(label)
+    # print(label)
 
     if input_size is not None:
         h, w = input_size

@@ -34,7 +34,7 @@ DATA_DIRECTORY = config['directories']['DATA_DIRECTORY']
 DATA_TRAIN_LIST_PATH = config['directories']['lists']['DATA_TRAIN_LIST_PATH']
 IGNORE_LABEL = config['IGNORE_LABEL']
 INPUT_SIZE = config['INPUT_SIZE']
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 2*1e-4
 NUM_CLASSES = config['NUM_CLASSES']
 NUM_STEPS = 2000
 RANDOM_SEED = 1234
@@ -122,6 +122,8 @@ def fine_tune():
 
     h, w = map(int, args.input_size.split(','))
     input_size = (h, w)
+    print("Input size:")
+    print(input_size)
 
     tf.set_random_seed(args.random_seed)
 
